@@ -1,0 +1,1 @@
+Springboot netty长连接基于注解的路由处理器。功能类似SpringMVC的@PostMapping、@GetMapping等注解提供的能力。
