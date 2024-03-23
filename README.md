@@ -1,5 +1,5 @@
 ### 简介
-anno-router是基于Springboot+Netty全双工注解型路由处理器。功能类似SpringMVC的@PostMapping等注解 + JAP @Repository注解提供的能力。该组件用于降低socket长连接业务开发的复杂度。 详细使用方法参见“anno-router-demo”工程
+anno-router是基于Springboot+Netty全双工注解型路由处理器。功能类似SpringMVC的@PostMapping等注解 + JPA @Repository注解提供的能力。该组件用于降低socket长连接业务开发的复杂度。 详细使用方法参见“anno-router-demo”工程
 
 ### 特性
 1. 基于注解处理接收消息（类似SpringMVC Post/Get等注解能力）
