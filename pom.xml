@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.artomic</groupId>
+  <artifactId>anno-router-group</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <name>anno-router-group</name>
+  <description>anno-router module and demo.</description>
+   <properties>
+    <java.version>11</java.version>
+    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+  <modules>
+   <module>anno-router</module>
+   <module>anno-router-demo</module>
+  </modules>
+  
+</project>
