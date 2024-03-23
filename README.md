@@ -1,4 +1,6 @@
-Springboot netty全双工基于注解的路由处理器。功能类似SpringMVC的@PostMapping等注解 + JAP @Repository注解提供的能力。
+### 简介
+    anno-router是基于Springboot+Netty全双工注解型路由处理器。功能类似SpringMVC的@PostMapping等注解 + JAP @Repository注解提供的能力。该组件用于简化socket长连接业务开发的复杂度。 详细使用方法参见“anno-router-demo”工程
+
 
 
 #### 服务端接收消息定义：
@@ -18,6 +20,7 @@ public class MyServerTestSpi {
 ```java
 @DynamicApi
 public interface MyServerTestApi {
+    //返回类型void为异步消息，否则为同步消息
     @ApiDef(action = "serverHello")
     RspMessage<?> hello(ApiSession as, HelloMessage req);
 }
@@ -47,6 +50,7 @@ public class MyClientTestSpi {
 ```java
 @DynamicApi
 public interface MyClientTestApi {
+    //返回类型void为异步消息，否则为同步消息
     //客户端只一个Session因此无需ApiSession参数
     @ApiDef(action = "clientHello")
     RspMessage<?> hello(HelloMessage req);
