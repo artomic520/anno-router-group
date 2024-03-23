@@ -8,7 +8,7 @@ import org.artomic.netty.route.dynamic.anno.DynamicApi;
 
 @DynamicApi
 public interface MyServerTestApi {
-    
+    //返回类型void为异步消息，否则为同步消息
     @ApiDef(action = "serverHello")
     RspMessage<?> hello(ApiSession as, HelloMessage req);
 }
