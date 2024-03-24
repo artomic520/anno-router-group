@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface ApiSpi {
-    String value() default "";//driver type
+    String value() default "";//component name
+    String driver() default "";//driver type
 }

@@ -168,5 +168,20 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
     public void setTimeOut(long timeOut) {
         this.timeOut = timeOut;
     }
-    
+
+	public String getDriver() {
+		return driver;
+	}
+
+	public void setDriver(String driver) {
+		this.driver = driver;
+	}
+
+	public String[] getScanPaths() {
+		return scanPaths;
+	}
+
+	public void setScanPaths(String[] scanPaths) {
+		this.scanPaths = scanPaths;
+	}
 }

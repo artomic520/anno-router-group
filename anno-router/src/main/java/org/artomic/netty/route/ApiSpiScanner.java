@@ -97,7 +97,7 @@ public class ApiSpiScanner extends ClassPathBeanDefinitionScanner {
             assister.setScanPath(scanPath);
             assister.setAction(apiDef.action());
             assister.setGroup(apiDef.group());
-            assister.setDirver(apiTask.value());
+            assister.setDirver(apiTask.driver());
             assister.setProcessorClass(beanClass);
             assister.setMethod(method);
             checkAndPutApiDef(assister, apiMap);

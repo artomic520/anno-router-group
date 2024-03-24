@@ -53,6 +53,7 @@ public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor
         msg.obtainHeader().setApiGroup(apiDef.group());
         msg.obtainHeader().setApiAction(apiDef.action());
         Class<?> returnType = method.getReturnType();
+        preInvoke(method, vs, msg);
         if (returnType.equals(Void.TYPE)) {
             vs.getChannel().writeAndFlush(msg);
             return null;
@@ -73,7 +74,7 @@ public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor
     }
     
     /**
-     * 生成没有body消息
+     * 生成没有body消息。用于只有header的消息
      * @return
      */
     abstract protected ApiMessage<T> genNoBodyMessage();
@@ -141,14 +142,21 @@ public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor
     }
     
     /**
-     * 响应消息返回前处理，用途：返回消息发生业务错误时，以异常的形式抛出
+     * 发送消息前处理，可用于日志、权限等处理
+     * @param method
+     * @param vs
+     * @param msg
+     */
+    protected void preInvoke(Method method, ApiSession vs, ApiMessage<T> msg) {
+    	
+    }
+    
+    /**
+     * 响应消息返回前处理，用途举例：返回消息发生业务错误时，以异常的形式抛出
      * @param rsp
      */
     protected void preRspProcess(ApiMessage<T> rsp) {
-        //TODO
-//        if (StringUtils.isNotEmpty(rsp.getCode()) && !StringUtils.equals(GlobalConstant.SUCCESS_STR_CODE, rsp.getCode())) {
-//            throw new BizException(Long.parseLong(rsp.getCode())).setOriMsg(rsp.getMsg());
-//        }
+    	
     }
 
     public boolean isMultiSession() {

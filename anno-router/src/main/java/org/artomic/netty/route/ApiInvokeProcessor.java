@@ -17,6 +17,7 @@ public abstract class ApiInvokeProcessor<T> {
     
     private static final Logger logger = LoggerFactory.getLogger(ApiInvokeProcessor.class);
     
+    //请求参数校验器
     private javax.validation.Validator globalValidator; 
     
     public ApiInvokeProcessor() {
@@ -77,31 +78,34 @@ public abstract class ApiInvokeProcessor<T> {
      * @param driver 驱动
      * @param scanPaths 扫描路径列表
      * @param req api req
-     * @param vs session会话
+     * @param as session会话
      * @return ApiMessage: response message
      */
-    public ApiMessage<T> invokeApi(String driver, String[] scanPaths, HalfDecodeMsg<T> req, ApiSession vs) {
-        //find assister
-        ApiInvokeAssistant assister = findAssistant(driver, scanPaths, req.getHeader());
-        if (assister == null) {
+    public ApiMessage<T> invokeApi(String driver, String[] scanPaths, HalfDecodeMsg<T> req, ApiSession as) {
+        //find assistant
+        ApiInvokeAssistant assistant = findAssistant(driver, scanPaths, req.getHeader());
+        if (assistant == null) {
             logger.error("Api group={} action={} is not defined", req.getHeader().getApiGroup(), req.getHeader().getApiAction());
             return null;
         }
         logger.debug("Receive message from '{}', apiGroup={}  apiAction ={}", 
-                vs.getChannel().remoteAddress(), req.getHeader().getApiGroup(), req.getHeader().getApiAction());
+                as == null ? "" : as.getChannel().remoteAddress(), 
+                req.getHeader().getApiGroup(), req.getHeader().getApiAction());
         
-        ApiMessage<T> rsp = doMethodInvoke(assister, req, vs);
+        ApiMessage<T> rsp = doMethodInvoke(assistant, req, as);
         if (rsp != null) {
             rsp.obtainHeader().setApiGroup(req.getHeader().getApiGroup());
             rsp.obtainHeader().setApiAction(req.getHeader().getApiAction());
             rsp.obtainHeader().setMsgFrameId(req.getHeader().getMsgFrameId());
             rsp.obtainHeader().asRspMsg();
             logger.debug("Send message to '{}', apiGroup={}  apiAction ={}, ApiMessage={}", 
-                    vs.getChannel().remoteAddress(), req.getHeader().getApiGroup(), req.getHeader().getApiAction(), rsp);
+                    as == null ? "" :as.getChannel().remoteAddress(), 
+                    req.getHeader().getApiGroup(), req.getHeader().getApiAction(), rsp);
         }
         
         return rsp;
     }
+    
     
     @SuppressWarnings("unchecked")
     private ApiMessage<T> doMethodInvoke(ApiInvokeAssistant assister, HalfDecodeMsg<T> req, ApiSession as) {
@@ -130,6 +134,7 @@ public abstract class ApiInvokeProcessor<T> {
             }
         }
         try {
+        	preMethodInvoke(assister, as, req.getHeader(), newReq);
             if (newReq != null) {
                 reqParaValid(newReq);
             }
@@ -151,8 +156,31 @@ public abstract class ApiInvokeProcessor<T> {
             if (!isOneWay) {
                 return handleException(tr, req.getHeader(), newReq);
             }
+        } finally {
+        	postMethodInvoke(assister, as, req.getHeader(), newReq);
         }
         return null;
+    }
+    
+    /**
+     * 调用前
+     * @param assistant
+     * @param as
+     * @param header
+     * @param req
+     */
+    protected void preMethodInvoke(ApiInvokeAssistant assistant, ApiSession as, ApiHeader header, ApiMessage<T> req) {
+    	
+    }
+    /**
+     * 调用后
+     * @param assistant
+     * @param as
+     * @param header
+     * @param req
+     */
+    protected void postMethodInvoke(ApiInvokeAssistant assistant, ApiSession as, ApiHeader header, ApiMessage<T> req) {
+    	
     }
     
     protected ApiMessage<T> handleException (Throwable throwable, ApiHeader header, @Nullable ApiMessage<T> req){
@@ -178,9 +206,9 @@ public abstract class ApiInvokeProcessor<T> {
             return message;
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
-            //TODO
+            //TODO 
             logger.error("", e);
-            logger.error("ApiMessage must have a public Constructor. ApiMessage class:{}", methodPara);
+            logger.error("ApiMessage must have a public Constructor which has no args. ApiMessage class:{}", methodPara);
             throw new IllegalArgumentException(methodPara.getName() + " must have a public Constructor");
         }
     }
@@ -208,5 +236,13 @@ public abstract class ApiInvokeProcessor<T> {
      * @return
      */
     abstract protected ApiMessage<T> doHandleException(Throwable throwable, @Nullable ApiMessage<T> req);
+    
+    
+	public javax.validation.Validator getGlobalValidator() {
+		return globalValidator;
+	}
+	public void setGlobalValidator(javax.validation.Validator globalValidator) {
+		this.globalValidator = globalValidator;
+	}
     
 }
