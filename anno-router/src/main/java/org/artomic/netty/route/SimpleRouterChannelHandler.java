@@ -125,6 +125,11 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
         return new ArrayList<>(sessionMap.values());
     }
     
+    protected RuntimeException timeOutException(ApiMessage<T> req) {
+    	return new AnnoRouterException(AnnoRouterException.ERR_MSG_RESP_TIMEOUT, 
+                "apigroup=" + req.obtainHeader().getApiGroup() + " apiAction=" + req.obtainHeader().getApiAction() + " response timeout");
+    }
+    
     /**
      * 发送消息等待响应
      * @param session
@@ -139,8 +144,7 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
                 session.getChannel().writeAndFlush(req);
                 HalfDecodeMsg<T> rsp = assistant.await(timeOut, TimeUnit.SECONDS);
                 if (rsp == null) {
-                    throw new AnnoRouterException(AnnoRouterException.ERR_MSG_RESP_TIMEOUT, 
-                            "apigroup=" + req.obtainHeader().getApiGroup() + " apiAction=" + req.obtainHeader().getApiAction() + " response timeout");
+                    throw timeOutException(req);
                 }
                 return rsp;
             } else {

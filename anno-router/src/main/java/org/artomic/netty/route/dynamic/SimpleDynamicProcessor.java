@@ -79,6 +79,15 @@ public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor
      */
     abstract protected ApiMessage<T> genNoBodyMessage();
     
+    /**
+     * session未就绪（连接未建立）
+     * @param sessionId
+     * @return
+     */
+    protected RuntimeException sessionNoReadyException(String sessionId) {
+    	return new AnnoRouterException(AnnoRouterException.ERR_SESSION_NOREADY, "Connection is no ready");
+    }
+    
     private ApiSession getSession(Method method, Object[] args) {
         Parameter[] paras = method.getParameters();
         for (int i = 0; i < paras.length; i++) {
@@ -89,7 +98,7 @@ public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor
                     String sessionId = args[i].toString();
                     ApiSession session = routerHandler.findSession(sessionId);
                     if (session == null) {
-                        throw new AnnoRouterException(AnnoRouterException.ERR_SESSION_NOREADY, "Connection is no ready");
+                        throw sessionNoReadyException(sessionId);
                     }
                     return session;
                     
