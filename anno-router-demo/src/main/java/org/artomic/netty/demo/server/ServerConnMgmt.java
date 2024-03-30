@@ -1,6 +1,5 @@
 package org.artomic.netty.demo.server;
 
-import java.util.concurrent.TimeUnit;
 
 import org.artomic.netty.demo.codec.AppDecoder;
 import org.artomic.netty.demo.codec.AppEncoder;
@@ -15,7 +14,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.UnorderedThreadPoolEventExecutor;
 
 @Service
@@ -43,12 +41,9 @@ public class ServerConnMgmt {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         
-                        p.addLast(new AppDecoder());
-                        
-                        p.addLast(new AppEncoder());
-                        
-                        p.addLast(new IdleStateHandler(0, 0, 60, TimeUnit.SECONDS));
-                        p.addLast(executorGroup, serverChannelInboundHandler);
+                        p.addLast(new AppDecoder());//解码器
+                        p.addLast(new AppEncoder());//编码器
+                        p.addLast(executorGroup, serverChannelInboundHandler);//消息路由处理器
                     }
                     
                 });

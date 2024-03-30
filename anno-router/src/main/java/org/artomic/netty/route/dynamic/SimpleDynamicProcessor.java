@@ -15,11 +15,19 @@ import org.artomic.netty.route.exception.AnnoRouterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 动态Interface API实现类
+ * @param <T>
+ */
 public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor {
     private static final Logger logger = LoggerFactory.getLogger(SimpleDynamicProcessor.class);
     
     protected SimpleRouterChannelHandler<T> routerHandler;
     
+    /**
+     * 是否为多会话，一般来说server端multiSession=true, client端multiSession=false
+     * multiSession为true Interface API定义的方法中可以忽略ApiSession或@ApiSessionId 参数
+     */
     private boolean multiSession;
     
     public SimpleDynamicProcessor(SimpleRouterChannelHandler<T> routerHandler, boolean multiSession) {
