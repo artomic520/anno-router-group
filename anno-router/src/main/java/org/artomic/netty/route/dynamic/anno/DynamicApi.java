@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Indexed;
 
@@ -15,4 +16,7 @@ import org.springframework.stereotype.Indexed;
 @Component
 @Indexed
 public @interface DynamicApi {
+	
+	@AliasFor(annotation = Component.class)
+    String value() default "";//component name
 }

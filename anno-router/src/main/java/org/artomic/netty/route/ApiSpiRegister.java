@@ -27,12 +27,12 @@ public class ApiSpiRegister implements ImportBeanDefinitionRegistrar, ResourceLo
         }
         Set<String> packages = new HashSet<>();
         addPackages(packages, attributes.getStringArray("value"));
-        
-        ApiSpiScanner scanner = new ApiSpiScanner(registry, classLoader);
+        String[] scanPaths =  StringUtils.toStringArray(packages);
+        ApiSpiScanner scanner = new ApiSpiScanner(registry, classLoader, scanPaths);
         if (this.resourceLoader != null) {
             scanner.setResourceLoader(this.resourceLoader);
         }
-        scanner.scan(StringUtils.toStringArray(packages));
+        scanner.scan(scanPaths);
     }
 
     private void addPackages(Set<String> packages, String[] values) {

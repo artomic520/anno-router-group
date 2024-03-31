@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.artomic.netty.route.anno.ApiDef;
@@ -12,9 +11,8 @@ import org.artomic.netty.route.anno.ApiSpi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.Assert;
@@ -26,10 +24,13 @@ public class ApiSpiScanner extends ClassPathBeanDefinitionScanner {
     static Map<String, Map<String, ApiInvokeAssistant>> apiInvokeMap = new HashMap<>();
 
     private ClassLoader classLoader;
+    
+    private String[] scanPaths;
 
-    public ApiSpiScanner(BeanDefinitionRegistry registry, ClassLoader classLoader) {
+    public ApiSpiScanner(BeanDefinitionRegistry registry, ClassLoader classLoader, String[] scanPaths) {
         super(registry, false);
         this.classLoader = classLoader;
+        this.scanPaths = scanPaths;
         this.addIncludeFilter(new AnnotationTypeFilter(ApiSpi.class));
     }
     
@@ -40,26 +41,22 @@ public class ApiSpiScanner extends ClassPathBeanDefinitionScanner {
         }
         return false;
     }
-
+    
     @Override
-    protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
-        Set<BeanDefinitionHolder> beanDefinitions = super.doScan(basePackages);
-        for (BeanDefinitionHolder holder : beanDefinitions) {
-            GenericBeanDefinition definition = (GenericBeanDefinition) holder.getBeanDefinition();
-            Class<?> beanClass = null;
-            try {
-                beanClass = ClassUtils.forName(definition.getBeanClassName(), this.classLoader);
-            } catch (Exception e) {
-                logger.error("", e);
-                continue;
-            }
-            String scanPath = getScanPath(beanClass, basePackages);
-            ApiSpi apiTask = beanClass.getAnnotation(ApiSpi.class);
-            importAssisters(scanPath, beanClass, apiTask);
-
+	protected void postProcessBeanDefinition(AbstractBeanDefinition beanDefinition, String beanName) {
+		super.postProcessBeanDefinition(beanDefinition, beanName);
+		Class<?> beanClass = null;
+        try {
+            beanClass = ClassUtils.forName(beanDefinition.getBeanClassName(), this.classLoader);
+        } catch (Exception e) {
+            logger.error("", e);
+            return;
         }
-        return beanDefinitions;
-    }
+        
+        String scanPath = getScanPath(beanClass);
+        ApiSpi apiTask = beanClass.getAnnotation(ApiSpi.class);
+        importAssisters(scanPath, beanClass, apiTask);
+	}
 
     private Map<String, ApiInvokeAssistant> getOrNewApiMap(String scanPath) {
         Map<String, ApiInvokeAssistant> map = apiInvokeMap.get(scanPath);
@@ -70,9 +67,9 @@ public class ApiSpiScanner extends ClassPathBeanDefinitionScanner {
         return map;
     }
 
-    private String getScanPath(Class<?> beanClass, String... basePackages) {
+    private String getScanPath(Class<?> beanClass) {
         String className = beanClass.getName();
-        for (String path : basePackages) {
+        for (String path : scanPaths) {
             if (className.startsWith(path)) {
                 return path;
             }
