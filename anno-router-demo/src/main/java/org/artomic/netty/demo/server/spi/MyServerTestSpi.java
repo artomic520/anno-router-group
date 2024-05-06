@@ -23,4 +23,13 @@ public class MyServerTestSpi {
         rsp.getBody().setMsg("server response : jie jie jie");
         return rsp;
     }
+    
+    
+    @ApiDef(action = "asyncTest")
+    public RspMessage<?> asyncTest(HelloMessage req) {
+    	RspMessage<?> rsp = new RspMessage<>();
+        rsp.getBody().setCode("0");
+        rsp.getBody().setMsg("async response : jie jie jie");
+        return rsp;
+    }
 }

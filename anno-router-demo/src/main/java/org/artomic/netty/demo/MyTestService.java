@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.artomic.netty.demo.client.ClientConnMgmt;
 import org.artomic.netty.demo.client.api.MyClientTestApi;
+import org.artomic.netty.demo.client.async.MyAsyncService;
 import org.artomic.netty.demo.dto.HelloMessage;
 import org.artomic.netty.demo.dto.RspMessage;
 import org.artomic.netty.demo.server.ServerChannelInboundHandler;
@@ -23,6 +24,8 @@ public class MyTestService {
     private MyClientTestApi myClientTestApi;
     @Autowired
     private MyServerTestApi myServerTestApi;
+    @Autowired
+    private MyAsyncService myAsyncService;
     
     @Autowired
     private ServerChannelInboundHandler serverChannelInboundHandler;
@@ -51,6 +54,7 @@ public class MyTestService {
         System.out.println("client send:" + clientSay);
         RspMessage<?> rsp = myClientTestApi.hello(new HelloMessage(clientSay));
         System.out.println(rsp.getBody().getMsg());
+        System.out.println("-------------------");
         
         Thread.sleep(2 * 1000L);
         ApiSession as = serverChannelInboundHandler.getAllSession().get(0);
@@ -58,6 +62,15 @@ public class MyTestService {
         System.out.println("server send:" + serverSay);
         RspMessage<?> rsp2 = myServerTestApi.hello(as, new HelloMessage(serverSay));
         System.out.println(rsp2.getBody().getMsg());
+        
+        System.out.println("-------------------");
+        Thread.sleep(2 * 1000L);
+        String asynSay = "ni shi ge async hao ren";
+        System.out.println("server send:" + asynSay);
+        myAsyncService.asyncTest(new HelloMessage(asynSay), (result) -> {
+        	System.out.println(((RspMessage<?>)result.getValue()).getBody().getMsg());
+        });
+        
         
     }
 

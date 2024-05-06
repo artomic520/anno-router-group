@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.artomic.netty.route.ApiMessage;
 import org.artomic.netty.route.ApiSession;
+import org.artomic.netty.route.Constants;
 import org.artomic.netty.route.HalfDecodeMsg;
 import org.artomic.netty.route.SimpleRouterChannelHandler;
 import org.artomic.netty.route.anno.ApiDef;
@@ -93,7 +94,7 @@ public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor
      * @return
      */
     protected RuntimeException sessionNoReadyException(String sessionId) {
-    	return new AnnoRouterException(AnnoRouterException.ERR_SESSION_NOREADY, "Connection is no ready");
+    	return new AnnoRouterException(Constants.ERR_SESSION_NOREADY, "Connection is no ready");
     }
     
     private ApiSession getSession(Method method, Object[] args) {
@@ -127,7 +128,7 @@ public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor
             if (!sessions.isEmpty()) {
                 return sessions.get(0);
             } else {
-                throw new AnnoRouterException(AnnoRouterException.ERR_SESSION_NOREADY, "Connection is no ready");
+                throw new AnnoRouterException(Constants.ERR_SESSION_NOREADY, "Connection is no ready");
             }
         }
     }

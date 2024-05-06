@@ -11,4 +11,7 @@ public interface MyClientTestApi {
     //客户端只一个Session因此无需ApiSession参数
     @ApiDef(action = "clientHello")
     RspMessage<?> hello(HelloMessage req);
+    
+    @ApiDef(action = "asyncTest")
+    void asyncTest(HelloMessage req);
 }

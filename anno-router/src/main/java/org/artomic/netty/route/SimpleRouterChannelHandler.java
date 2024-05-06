@@ -20,8 +20,6 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
 public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInboundHandler<HalfDecodeMsg<T>> {
-    public static final String KEY_SESSION_ID = "KEY_SESSION_ID";
-    public static final long DEFAULT_TIMEOUT = 30;//unit seccond
     
     private static final Logger logger = LoggerFactory.getLogger(SimpleRouterChannelHandler.class);
     
@@ -29,7 +27,7 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
     
     private Map<String, SynAssistant<HalfDecodeMsg<T>>> syncInfoMap = new ConcurrentHashMap<>();
     
-    private long timeOut = DEFAULT_TIMEOUT;
+    private long timeOut = Constants.DEFAULT_TIMEOUT;
     private String driver;
     private String[] scanPaths;
     protected ApiInvokeProcessor<T> invokeProcessor;
@@ -46,7 +44,7 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
     
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HalfDecodeMsg<T> msg) throws Exception {
-        Attribute<String> attr =  ctx.channel().attr(AttributeKey.valueOf(KEY_SESSION_ID));
+        Attribute<String> attr =  ctx.channel().attr(AttributeKey.valueOf(Constants.KEY_SESSION_ID));
         ApiSession as = sessionMap.get(attr.get());
         if (msg.getHeader().isReqMsg()) {
             ApiMessage<T> rsp = invokeProcessor.invokeApi(driver, scanPaths, msg, as);
@@ -75,14 +73,14 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
         UUID id = UUID.randomUUID();
         Channel channel = ctx.channel();
         ApiSession vs = new ApiSession(id.toString(), channel);
-        Attribute<String> attr =  channel.attr(AttributeKey.valueOf(KEY_SESSION_ID));
+        Attribute<String> attr =  channel.attr(AttributeKey.valueOf(Constants.KEY_SESSION_ID));
         attr.set(vs.getId());
         sessionMap.put(vs.getId(), vs);
     }
     
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Attribute<String> attr = ctx.channel().attr(AttributeKey.valueOf(KEY_SESSION_ID));
+        Attribute<String> attr = ctx.channel().attr(AttributeKey.valueOf(Constants.KEY_SESSION_ID));
         String vsId = attr.get();
         sessionMap.remove(vsId);
         super.channelInactive(ctx);
@@ -101,7 +99,7 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
             return;
         }
         vs.setId(newId);
-        Attribute<String> attr = vs.getChannel().attr(AttributeKey.valueOf(KEY_SESSION_ID));
+        Attribute<String> attr = vs.getChannel().attr(AttributeKey.valueOf(Constants.KEY_SESSION_ID));
         attr.set(vs.getId());
         sessionMap.put(newId, vs);
         sessionMap.remove(oldId);
@@ -126,7 +124,7 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
     }
     
     protected RuntimeException timeOutException(ApiMessage<T> req) {
-    	return new AnnoRouterException(AnnoRouterException.ERR_MSG_RESP_TIMEOUT, 
+    	return new AnnoRouterException(Constants.ERR_MSG_RESP_TIMEOUT, 
                 "apigroup=" + req.obtainHeader().getApiGroup() + " apiAction=" + req.obtainHeader().getApiAction() + " response timeout");
     }
     
