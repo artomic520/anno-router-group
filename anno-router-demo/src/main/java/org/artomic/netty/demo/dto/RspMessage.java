@@ -10,11 +10,6 @@ public class RspMessage<T> extends AppApiMessage<RspMessage.RspBody<T>> {
         obtainHeader().setReqMsg(false);
     }
     
-    @Override
-    protected Class<?> getBodyClass() {
-        return RspBody.class;
-    }
-    
     public static class RspBody<V> {
         private String code;
         private String msg;

@@ -8,11 +8,6 @@ public class NoBodyMessage extends AppApiMessage<NoBodyMessage.Body> {
         super();
     }
     
-    @Override
-    protected Class<?> getBodyClass() {
-        return Body.class;
-    }
-    
     public static class Body {
         
     }

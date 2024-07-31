@@ -19,6 +19,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
+/**
+ * @author artomic
+ *
+ * @param <T> 未解码消息体
+ */
 public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInboundHandler<HalfDecodeMsg<T>> {
     
     private static final Logger logger = LoggerFactory.getLogger(SimpleRouterChannelHandler.class);
@@ -53,6 +58,9 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
             }
         } else {
             String frameId = msg.getHeader().getMsgFrameId();
+            if (frameId == null) {
+            	frameId = "";
+            }
             SynAssistant<HalfDecodeMsg<T>> assistant = syncInfoMap.get(frameId);
             if (assistant != null) {
                 assistant.notifyMsg(msg);

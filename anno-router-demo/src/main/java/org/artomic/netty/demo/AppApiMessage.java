@@ -1,5 +1,7 @@
 package org.artomic.netty.demo;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import io.netty.buffer.ByteBuf;
 
@@ -34,16 +36,21 @@ public abstract class AppApiMessage<T> implements ApiMessage<ByteBuf> {
     public void decodeBody(ByteBuf in) {
         if (in != null) {
             int len = in.readableBytes();
-            Class<?> bodyClass = getBodyClass();
+            Type bodyClass = getBodyClass();
             if (len > 0 && bodyClass != null) {
                 CharSequence json = in.readCharSequence(len, charset);
                 DefTypeReference<T> ref = new DefTypeReference<>(bodyClass);
                 body = JsonUtils.parse(json.toString(), ref);
             }
+            in.release();
         }
     }
     
-    abstract protected Class<?> getBodyClass();
+    public Type getBodyClass() {
+        Type t = getClass().getGenericSuperclass();
+        Type firstClass = ((ParameterizedType) t).getActualTypeArguments()[0];
+        return firstClass;
+    }
 
     public T getBody() {
         return body;

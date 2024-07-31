@@ -1,5 +1,9 @@
 package org.artomic.netty.route;
 
+/**
+ * @author artomic
+ * @param <T> 未解码消息
+ */
 public class HalfDecodeMsg<T>  {
     
     private ApiHeader header;

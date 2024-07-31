@@ -26,29 +26,42 @@ public class MyTestService {
     private MyServerTestApi myServerTestApi;
     @Autowired
     private MyAsyncService myAsyncService;
+    @Autowired
+    private PerfTestService perfTestService;
     
     @Autowired
     private ServerChannelInboundHandler serverChannelInboundHandler;
     
     @PostConstruct
-    public void init() {
-        
+    private void init() {
+    	startTest();
+    }
+    
+    public void startTest() {
         new Thread(()-> {
             try {
+            	startSrv();
                 doTest();
+                perfTestService.synPerf();
+//                perfTestService.asynPerf();
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+            	stopSrv();
             }
         }, "test-thread").start();
     }
     
-    private void doTest() throws Exception {
-        Thread.sleep(3 * 1000L);
+    private void startSrv() throws Exception {
         server.startServer();
         System.out.println("Server initial");
         Thread.sleep(2 * 1000L);
         boolean connected = client.connect();
         System.out.println("client connect " +  (connected?"success" : "fail"));
+    }
+    
+    private void doTest() throws Exception {
+        
         Thread.sleep(2 * 1000L);
         String clientSay = "ni shi ge hao ren";
         System.out.println("client send:" + clientSay);
@@ -71,7 +84,18 @@ public class MyTestService {
         	System.out.println(((RspMessage<?>)result.getValue()).getBody().getMsg());
         });
         
-        
+    }
+    
+    private void stopSrv() {
+    	try {
+			Thread.sleep(5 * 1000);
+			client.disConnect();
+			
+			Thread.sleep(3 * 1000);
+			server.stopServer();
+			
+		} catch (InterruptedException e) {
+		}
     }
 
 }

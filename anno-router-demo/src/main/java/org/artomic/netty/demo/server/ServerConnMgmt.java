@@ -20,6 +20,8 @@ import io.netty.util.concurrent.UnorderedThreadPoolEventExecutor;
 public class ServerConnMgmt {
     @Autowired
     private ServerChannelInboundHandler serverChannelInboundHandler;
+    
+    private Channel serverChannel;
 
     public void startServer() {
         new Thread(()->{
@@ -49,7 +51,7 @@ public class ServerConnMgmt {
                 });
             try {
                 // Start the server.
-                Channel serverChannel = b.bind(9919).sync().channel();
+                serverChannel = b.bind(9919).sync().channel();
                 serverChannel.closeFuture().sync();
             } catch (InterruptedException e) {
             }
@@ -58,5 +60,15 @@ public class ServerConnMgmt {
             workerGroup.shutdownGracefully();
             executorGroup.shutdown();
         }
+    }
+    
+    public void stopServer() {
+    	if (serverChannel != null) {
+    		try {
+    			serverChannel.close();
+    		} finally {
+    			serverChannel = null;
+    		}
+    	}
     }
 }

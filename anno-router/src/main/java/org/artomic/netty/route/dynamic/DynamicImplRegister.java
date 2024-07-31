@@ -26,6 +26,7 @@ public class DynamicImplRegister implements ImportBeanDefinitionRegistrar, Resou
     private ClassLoader classLoader;
     private ResourceLoader resourceLoader;
 
+    @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         AnnotationAttributes attributes = AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(DynamicImplScan.class.getName(), true));
         Set<String> packages = new HashSet<>();

@@ -26,6 +26,8 @@ public class ClientConnMgmt {
     @Autowired
     private ClientChannelInboundHandler clientChannelInboundHandler;
     
+    private ChannelFuture channelFuture;
+    
     public boolean connect() {
         final InetSocketAddress socketAddr = 
                 InetSocketAddress.createUnresolved("127.0.0.1", 9919);
@@ -51,11 +53,24 @@ public class ClientConnMgmt {
                 }
             });
         bootstrap.remoteAddress(socketAddr);
-        ChannelFuture channelFuture = bootstrap.connect();
+        channelFuture = bootstrap.connect();
         try {
             return channelFuture.await(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
         }
+        
         return false;
+    }
+    
+    public void disConnect() {
+    	if (channelFuture != null) {
+            try {
+                channelFuture.channel().disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                channelFuture = null;
+            }
+        }
     }
 }

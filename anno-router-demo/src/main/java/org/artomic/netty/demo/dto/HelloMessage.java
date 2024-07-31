@@ -19,11 +19,6 @@ public class HelloMessage extends AppApiMessage<HelloMessage.Body> {
         setBody(body);
     }
     
-    @Override
-    protected Class<?> getBodyClass() {
-        return HelloMessage.Body.class;
-    }
-
     public static class Body {
         private String msg;
 

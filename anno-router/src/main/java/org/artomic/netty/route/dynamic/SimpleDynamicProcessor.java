@@ -27,7 +27,7 @@ public abstract class SimpleDynamicProcessor<T> implements IDynamicImplProcessor
     
     /**
      * 是否为多会话，一般来说server端multiSession=true, client端multiSession=false
-     * multiSession为true Interface API定义的方法中可以忽略ApiSession或@ApiSessionId 参数
+     * multiSession为true Interface API定义的方法中ApiSession或@ApiSessionId参数不能忽略
      */
     private boolean multiSession;
     
