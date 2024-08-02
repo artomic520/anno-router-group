@@ -93,7 +93,8 @@ public class MyTestService {
 			
 			Thread.sleep(3 * 1000);
 			server.stopServer();
-			
+			Thread.sleep(3 * 1000);
+			System.exit(0);
 		} catch (InterruptedException e) {
 		}
     }

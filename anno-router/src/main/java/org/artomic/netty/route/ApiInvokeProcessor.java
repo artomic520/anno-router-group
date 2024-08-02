@@ -81,7 +81,7 @@ public abstract class ApiInvokeProcessor<T> {
      * @param as session会话
      * @return ApiMessage: response message
      */
-    public ApiMessage<T> invokeApi(String driver, String[] scanPaths, HalfDecodeMsg<T> req, ApiSession as) {
+    public ApiMessage<?> invokeApi(String driver, String[] scanPaths, HalfDecodeMsg<T> req, ApiSession as) {
         //find assistant
         ApiInvokeAssistant assistant = findAssistant(driver, scanPaths, req.getHeader());
         if (assistant == null) {
@@ -92,7 +92,7 @@ public abstract class ApiInvokeProcessor<T> {
                 as == null ? "" : as.getChannel().remoteAddress(), 
                 req.getHeader().getApiGroup(), req.getHeader().getApiAction());
         
-        ApiMessage<T> rsp = doMethodInvoke(assistant, req, as);
+        ApiMessage<?> rsp = doMethodInvoke(assistant, req, as);
         if (rsp != null) {
             rsp.obtainHeader().setApiGroup(req.getHeader().getApiGroup());
             rsp.obtainHeader().setApiAction(req.getHeader().getApiAction());
@@ -108,7 +108,7 @@ public abstract class ApiInvokeProcessor<T> {
     
     
     @SuppressWarnings("unchecked")
-    private ApiMessage<T> doMethodInvoke(ApiInvokeAssistant assister, HalfDecodeMsg<T> req, ApiSession as) {
+	private ApiMessage<?> doMethodInvoke(ApiInvokeAssistant assister, HalfDecodeMsg<T> req, ApiSession as) {
         Object instance = getBean(assister.getProcessorClass());
         boolean isOneWay = assister.isMethodOneway();
         Method method = assister.getMethod();
@@ -125,7 +125,7 @@ public abstract class ApiInvokeProcessor<T> {
                 if (ApiSession.class.isAssignableFrom(paras[i])) {
                     args[i] = as;
                 } else if (ApiMessage.class.isAssignableFrom(paras[i])) {
-                    newReq = continueDecodeMsg(req, (Class<ApiMessage<T>>)paras[i]);//参数再转换 
+                    newReq = continueDecodeMsg(req, (Class<ApiMessage<T>>)paras[i]);//参数继续解码
                     args[i] = newReq;
                 } else {
                     logger.error("Only ApiMessage or ApiSession parameter permited. invalid parameter : {}. assister:{}", paras[i], assister);
@@ -138,7 +138,7 @@ public abstract class ApiInvokeProcessor<T> {
             if (newReq != null) {
                 reqParaValid(newReq);
             }
-            return (ApiMessage<T>) method.invoke(instance, args);
+            return (ApiMessage<?>) method.invoke(instance, args);
         } catch (IllegalAccessException | IllegalArgumentException e) {
             logger.error("Method invoke fail!", e);
         } catch (InvocationTargetException e) {
@@ -183,12 +183,13 @@ public abstract class ApiInvokeProcessor<T> {
     	
     }
     
-    protected ApiMessage<T> handleException (Throwable throwable, ApiHeader header, @Nullable ApiMessage<T> req){
-        ApiMessage<T> rsp = doHandleException(throwable, req);
-        rsp.obtainHeader().setApiAction(header.getApiAction());
-        rsp.obtainHeader().setApiGroup(header.getApiGroup());
-        rsp.obtainHeader().setMsgFrameId(req.obtainHeader().getMsgFrameId());
-        
+    protected ApiMessage<?> handleException (Throwable throwable, ApiHeader header, @Nullable ApiMessage<T> req){
+        ApiMessage<?> rsp = doHandleException(throwable, req);
+        if (rsp != null) {
+	        rsp.obtainHeader().setApiAction(header.getApiAction());
+	        rsp.obtainHeader().setApiGroup(header.getApiGroup());
+	        rsp.obtainHeader().setMsgFrameId(req.obtainHeader().getMsgFrameId());
+        }
         return rsp;
     }
     
@@ -200,13 +201,14 @@ public abstract class ApiInvokeProcessor<T> {
      */
     protected ApiMessage<T> continueDecodeMsg(HalfDecodeMsg<T> req, Class<ApiMessage<T>> methodPara) {
         try {
+        	//TODO 后续支持多种构造方法
             ApiMessage<T> message = methodPara.getConstructor().newInstance();
             message.setupHeader(req.getHeader());
             message.decodeBody(req.getUndecodedMsg());
             return message;
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
-            //TODO 
+            
             logger.error("", e);
             logger.error("ApiMessage must have a public Constructor which has no args. ApiMessage class:{}", methodPara);
             throw new IllegalArgumentException(methodPara.getName() + " must have a public Constructor");
@@ -235,7 +237,7 @@ public abstract class ApiInvokeProcessor<T> {
      * @param req
      * @return
      */
-    abstract protected ApiMessage<T> doHandleException(Throwable throwable, @Nullable ApiMessage<T> req);
+    abstract protected ApiMessage<?> doHandleException(Throwable throwable, @Nullable ApiMessage<T> req);
     
     
 	public javax.validation.Validator getGlobalValidator() {

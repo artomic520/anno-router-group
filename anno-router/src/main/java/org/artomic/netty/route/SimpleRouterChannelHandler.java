@@ -52,7 +52,7 @@ public abstract class SimpleRouterChannelHandler<T> extends SimpleChannelInbound
         Attribute<String> attr =  ctx.channel().attr(AttributeKey.valueOf(Constants.KEY_SESSION_ID));
         ApiSession as = sessionMap.get(attr.get());
         if (msg.getHeader().isReqMsg()) {
-            ApiMessage<T> rsp = invokeProcessor.invokeApi(driver, scanPaths, msg, as);
+            ApiMessage<?> rsp = invokeProcessor.invokeApi(driver, scanPaths, msg, as);
             if (rsp != null) {
                 ctx.channel().writeAndFlush(rsp);
             }
